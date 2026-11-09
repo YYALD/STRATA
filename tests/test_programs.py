@@ -54,5 +54,5 @@ def test_example_profile(tmp_path):
     V = df.iloc[:, 1:].to_numpy(float)
     assert list(df.columns[:2]) == ["STATION", "CH1"] and V.shape == (60, 30) and t.size == 30
     assert np.all(V > 0) and np.all(np.diff(t) > 0)
-    assert np.all(np.diff(np.log10(V), axis=1) <= 0)          # every decay non-increasing in time
+    assert np.all(np.diff(np.log10(V), axis=1) <= 0)          # diffusion decay form kept in time
     assert (tmp_path / "events.json").is_file()

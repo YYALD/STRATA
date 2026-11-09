@@ -1,7 +1,7 @@
 """Decay-manifold-constrained feature extraction (in time): the decay encoder (Embedder), the condition extractor
-(TEMConditionExtractor) and its supervision heads, the decoder with a monotone head (Recovery), so every decoded
-decay is non-increasing, and the credibility gate on the manifold of the anchor conditions (_FinCMG with its memory
-bank)."""
+(TEMConditionExtractor) and its supervision heads, the decoder with a diffusion-consistent head (Recovery), which
+preserves the decay features of the physical diffusion process, and the credibility gate on the manifold of the
+anchor conditions (_FinCMG with its memory bank)."""
 
 from __future__ import annotations
 
@@ -48,8 +48,8 @@ class Embedder(nn.Module):
 
 class Recovery(nn.Module):
     """Decoder: a recurrent stack with a zero-initialised convolutional residual head.  With monotone_head the output
-    is read as a start level and non-negative decrements per gate, so every decoded decay is non-increasing in time
-    by construction."""
+    is read as a start level and decay increments per gate, which preserves the decay features of the diffusion
+    process."""
 
     def __init__(self, hidden_dim: int = 64, output_dim: int = 1, num_layers: int = 2, module_name: str = "lstm",
                  residual_enabled: bool = True, residual_channels: int = 32, residual_layers: int = 3,

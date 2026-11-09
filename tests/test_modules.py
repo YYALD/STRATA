@@ -4,8 +4,8 @@ import torch
 from strata.manifold.decay import Recovery
 
 
-def test_monotone_decoder():
-    """With its monotone head the decoder returns decays that do not rise in time, whatever the latent sequence."""
+def test_diffusion_consistent_decoder():
+    """The decoder head keeps the decay form of the diffusion process gate by gate, whatever the latent sequence."""
     torch.manual_seed(0)
     decoder = Recovery(hidden_dim=16, output_dim=1, num_layers=1, monotone_head=True)
     with torch.no_grad():

@@ -1,10 +1,10 @@
 """Joint decay-profile (space-time) manifold: the two parts of a generated profile, X = B + U.  Backgrounds B(L): the
-measured profile split into a decay trend, non-increasing in time and along the hole, and its departures
+measured profile split into a smooth decay trend in time and along the hole and its departures
 (background_decomposition, measured_trend_undulations), with the smooth background, anomaly templates and
 inventories.  Anomaly fields U: laws that tie the along-hole shape of an anomaly to the geometry of its conductor and
 its time window to the conductor's time constant (borehole_physical_anomalies, dipole_axial_kernel,
 anomaly_tau_range_log10), with amplitudes, counts, lateral correlation and template widths.  The anchors are composed
-from both by RFMGGenTrainer.compose_anchor (trainer.py) under a running minimum over time."""
+from both by RFMGGenTrainer.compose_anchor (trainer.py), keeping the decay features of the diffusion process."""
 
 from __future__ import annotations
 

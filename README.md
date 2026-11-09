@@ -17,10 +17,11 @@ where $\mathcal{B}(\mathbf{L})$ are along-hole backgrounds derived from the meas
 $\mathcal{U}$ anomaly fields of conductors near the hole. Every generated profile starts from an anchor, the measured
 decay trend with synthetic anomalies drawn under physical priors; a network trained against critics of measured data
 then deforms only the background of the anchor, so each anomaly keeps the depth, shape and amplitude of its label. The
-constraints act in time (decay manifold: every decay non-increasing, every background decay tested against the
-measured decays), along the hole (profile manifold: a latent field correlates the deformation from station to station,
-a monotone warp keeps the rock units in order, a critic judges profile windows) and across the two (an anomaly takes
-its along-hole shape from the geometry of its conductor and its time window from the conductor's time constant).
+constraints act in time (decay manifold: the decay features of the physical diffusion process are preserved, and
+every background decay is tested against the measured decays), along the hole (profile manifold: a latent field
+correlates the deformation from station to station, an order-preserving warp keeps the rock units in order, a critic
+judges profile windows) and across the two (an anomaly takes its along-hole shape from the geometry of its conductor
+and its time window from the conductor's time constant).
 
 This repository holds the generator (`main.py` and the `strata` package) and one standalone program for each
 comparison generator (`methods/`). The field data of the manuscript are not included; the programs run on your own
@@ -28,16 +29,18 @@ profiles or on the synthetic example in `examples/`.
 
 ## Key Features
 
-- **Joint decay–profile (space–time) manifold constraint**: the measured profile is split into a decay trend,
-  non-increasing in time and along the hole, and its departures; anchor backgrounds change the level, decay rate and
-  along-hole contrast of the trend and stay non-increasing in time through a running minimum. 0–5 anomalies per
+- **Joint decay–profile (space–time) manifold constraint**: the measured profile is split into a smooth decay trend
+  in time and along the hole and its departures; anchor backgrounds change the level, decay rate and along-hole
+  contrast of the trend and keep the decay features of the diffusion process (a running minimum over time). 0–5
+  anomalies per
   profile are added as conductors cut by the hole (a Gaussian footprint that widens with time), conductors beside it
   (a tilted dipole field), near-hole zones or measured-like shapes from a shape bank (departures of the input,
   simulated conductors and shapes of a β-VAE), each with a time envelope set by the conductor's time constant. The
   drawn anomalies are the labels.
 - **Decay-manifold-constrained feature extraction (in time)**: each decay of the anchor is encoded with its
-  condition, a monotone decoder makes every decoded decay non-increasing, and a credibility gate moves decoded decays
-  whose conditions leave the manifold of the anchor conditions back toward it.
+  condition, a diffusion-consistent decoder preserves the decay features of the physical diffusion process in every
+  decoded decay, and a credibility gate moves decoded decays whose conditions leave the manifold of the anchor
+  conditions back toward it.
 - **Profile-manifold-constrained feature extraction (along the hole)**: a latent field and a depth context along the
   hole correlate the deformation from station to station, and a regional head reduces it to an order-preserving warp,
   a level and a contrast of the background, so each anomaly keeps the depth, shape and amplitude of its label.
@@ -139,8 +142,8 @@ CGAN-P, CDDPM-P) generate one profile per drawn anomaly layout, which is its lab
 
 - **`examples/make_synthetic_profile.py`**: writes a synthetic profile (`profile.csv`), its gate times
   (`gate_times.csv`) and its anomalies (`events.json`) in the layout the programs read.
-- **`tests/`**: the command lines, the generator loaded by path as the comparison programs load it, the monotone
-  decoder, and the training, generation and output files of every comparison program.
+- **`tests/`**: the command lines, the generator loaded by path as the comparison programs load it, the
+  diffusion-consistent decoder, and the training, generation and output files of every comparison program.
 
 ## Installation
 
@@ -253,7 +256,7 @@ flowchart TB
         E["Decay encoder"] --> G["Generator"]
         C["Condition extractor"] --> G
         Z["Latent field +<br/>depth context"] --> G
-        G --> R["Monotone decoder"]
+        G --> R["Diffusion-consistent<br/>decoder"]
     end
     subgraph S2 [" "]
         direction LR
@@ -284,12 +287,12 @@ The STRATA architecture consists of (files in `strata/`):
    `measured_trend_undulations`, `borehole_physical_anomalies`, `dipole_axial_kernel`; `trainer.py`:
    `RFMGGenTrainer.compose_anchor`)
    - **Backgrounds $\mathcal{B}(\mathbf{L})$**: the log amplitude of the measured profile is split into a decay trend,
-     non-increasing in time and along the hole, and the departures from it; a background is the trend with its level,
-     decay rate and contrast changed, under a running minimum over time.
+     smooth in time and along the hole, and the departures from it; a background is the trend with its level, decay
+     rate and contrast changed, keeping the decay features of the diffusion process (a running minimum over time).
    - **Anomaly fields $\mathcal{U}$**: relative response changes whose along-hole shape follows the geometry of the
      conductor (or the shape bank) and whose time window follows its time constant; they are the labels.
-   - **Anchor**: $\mathbf{X} = \mathbf{B} + \mathbf{U}$ with every decay non-increasing; the network below changes
-     only its background.
+   - **Anchor**: $\mathbf{X} = \mathbf{B} + \mathbf{U}$ with the decay features of the diffusion process preserved;
+     the network below changes only its background.
 
 2. **Decay-manifold-constrained feature extraction, in time** (`manifold/decay.py`: `Embedder`,
    `TEMConditionExtractor`, `Recovery`, `_FinCMG`)
@@ -297,8 +300,9 @@ The STRATA architecture consists of (files in `strata/`):
      anchor to a latent sequence; a direct value path keeps the amplitude of every gate.
    - **Condition extractor**: time, frequency and shape features in InceptionTime and Transformer streams give the
      condition of each decay.
-   - **Monotone decoder**: the decoder outputs a start level and non-negative decrements, so every decoded decay is
-     non-increasing; a skip connection returns the anchor when the latent sequence is unchanged.
+   - **Diffusion-consistent decoder**: the decoder outputs a start level and gate-by-gate decay increments, which
+     preserves the decay features of the physical diffusion process; a skip connection returns the anchor when the
+     latent sequence is unchanged.
    - **Credibility gate**: the condition of a decoded decay that lies beyond a learned radius of the manifold of the
      anchor conditions (a memory bank) is moved toward its projection on it, and the decoded effect of the move
      corrects the decay; within the radius the decay stays nearly unchanged.

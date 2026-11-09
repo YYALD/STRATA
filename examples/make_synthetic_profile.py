@@ -11,7 +11,7 @@ Writes three files in the layout the programs read:
                   comparison methods)
 The decays fall as a power law that steepens with time and weakens with depth; each anomaly is a Gaussian departure
 along the hole whose width grows with time and whose time window is set by its time constant.  Every decay is
-non-increasing in time.  It is a test signal, not a forward model."""
+decaying in time like a diffusion process.  It is a test signal, not a forward model."""
 from __future__ import annotations
 
 import argparse
@@ -43,7 +43,7 @@ def synthetic_profile(n_stations: int = 60, n_gates: int = 30, z0: float = 20.0,
         window = np.exp(-0.5 * (np.log10(t / tau) / 0.45) ** 2)
         L += a * window[None, :] * np.exp(-0.5 * ((z[:, None] - c) / width[None, :]) ** 2)
         events.append({"centre_m": float(c), "sigma_m": float(w)})
-    L = np.minimum.accumulate(L, axis=1)                    # non-increasing in time
+    L = np.minimum.accumulate(L, axis=1)                    # decay form kept in time
     return z, t, 10.0 ** L, events
 
 

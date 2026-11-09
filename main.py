@@ -7,27 +7,26 @@ the entry point, the modules are in the strata package.
 Architecture
 ------------
   * Joint decay-profile (space-time) manifold (strata/manifold/joint.py, strata/morphology.py, strata/trainer.py).
-    A generated profile is X = B + U with every decay non-increasing.  The measured profile is split into a decay
-    trend, non-increasing in time and along the hole, and the departures from it (background_decomposition,
-    measured_trend_undulations).  A background anchor is the trend with its level, decay rate and along-hole contrast
-    changed, under a running minimum over time; 0-5 anomalies drawn under physical priors, each with its along-hole
-    shape from the geometry of its conductor and its time window from the conductor's time constant (a conductor cut
-    by the hole, a conductor beside it, a near-hole zone, measured-like shapes from a shape bank of measured,
-    simulated and beta-VAE shapes), are added and are the labels (RFMGGenTrainer.compose_anchor,
-    RFMGGenTrainer.anomaly_fields, MorphologyVAE).
+    A generated profile is X = B + U with the decay features of the diffusion process preserved.  The measured
+    profile is split into a smooth decay trend in time and along the hole and the departures from it
+    (background_decomposition, measured_trend_undulations).  A background anchor is the trend with its level, decay
+    rate and along-hole contrast changed, keeping the decay features of the diffusion process (a running minimum over
+    time); 0-5 anomalies drawn under physical priors, each with its along-hole shape from the geometry of its
+    conductor and its time window from the conductor's time constant (a conductor cut by the hole, a conductor beside
+    it, a near-hole zone, measured-like shapes from a shape bank of measured, simulated and beta-VAE shapes), are
+    added and are the labels (RFMGGenTrainer.compose_anchor, RFMGGenTrainer.anomaly_fields, MorphologyVAE).
   * Decay-manifold-constrained feature extraction, in time (strata/manifold/decay.py).  An encoder (Embedder:
     Transformer and LSTM layers) maps each decay of the anchor to a latent sequence and a condition extractor
     (TEMConditionExtractor: time, frequency and shape features, InceptionTime and Transformer streams) to a
-    condition vector; the decoder (Recovery) ends in a monotone head, so every decoded decay is non-increasing; a
-    credibility gate (_FinCMG) moves the condition of a decoded decay far from those of the anchors toward its
-    projection on their manifold (a memory bank of anchor conditions), and the decoded effect of the move corrects
-    the decay.
+    condition vector; the decoder (Recovery) ends in a diffusion-consistent head that preserves the decay features of
+    the physical diffusion process; a credibility gate (_FinCMG) moves the condition of a decoded decay far from
+    those of the anchors toward its projection on their manifold (a memory bank of anchor conditions), and the
+    decoded effect of the move corrects the decay.
   * Profile-manifold-constrained feature extraction, along the hole (strata/manifold/profile.py).  A random-feature
-    field along the hole
-    (depth_latent_field) and a bidirectional GRU over the stations (ProfileDepthContext) correlate the deformation
-    from station to station; the regional head reduces the network's change to a monotone depth warp, a level and a
-    contrast of the background (RFMGGenTrainer._warp_background), so the anomalies keep their depths, shapes and
-    amplitudes; a critic judges profile windows (ProfilePatchDiscriminator).
+    field along the hole (depth_latent_field) and a bidirectional GRU over the stations (ProfileDepthContext)
+    correlate the deformation from station to station; the regional head reduces the network's change to an
+    order-preserving depth warp, a level and a contrast of the background (RFMGGenTrainer._warp_background), so the
+    anomalies keep their depths, shapes and amplitudes; a critic judges profile windows (ProfilePatchDiscriminator).
   * Generator (strata/models/generator.py: BridgeResidualGenerator, Supervisor): bidirectional LSTMs with FiLM on
     the anchor condition, cross-attention and a residual path on the anchor latent; the supervisor learns the
     latent dynamics.
