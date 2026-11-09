@@ -1,0 +1,27 @@
+# data and run products (this repository carries code only)
+input/
+examples/data/
+runs/
+model/
+output/
+outputdata/
+log/
+plot/
+*.csv
+*.npy
+*.npz
+*.pt
+*.pth
+*.log
+
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

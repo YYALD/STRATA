@@ -1,0 +1,10 @@
+# Python >= 3.10.  For a GPU, first install the PyTorch build that matches your CUDA from https://pytorch.org; NVIDIA
+# RTX 50-series GPUs (sm_120) need PyTorch >= 2.7 built for CUDA 12.8:
+#   pip install --index-url https://download.pytorch.org/whl/cu128 "torch>=2.7"
+# The torch line below then keeps it.
+torch>=2.7
+numpy
+pandas
+matplotlib
+# tests
+pytest
