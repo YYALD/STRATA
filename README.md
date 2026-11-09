@@ -60,7 +60,7 @@ STRATA/
 │   │   ├── extension.py           # stations and times without a measurement
 │   │   ├── contract.py            # measured and simulated data objects
 │   │   └── normalization.py       # adaptive normalisation
-│   ├── manifold/                  # the manifold constraints (core of STRATA)
+│   ├── manifold/                  # manifold constraints
 │   │   ├── joint.py               # joint decay–profile (space–time) manifold: B and U
 │   │   ├── decay.py               # decay-manifold-constrained feature extraction (in time)
 │   │   └── profile.py             # profile-manifold-constrained feature extraction (along the hole)
