@@ -1,7 +1,8 @@
-"""Spatial-feature-constrained module: the depth encoding of the stations, the random-Fourier latent field along the
-hole (depth_latent_field), the learned station context (ProfileDepthContext) and the critic of profile windows
-(ProfilePatchDiscriminator).  The regional head that reduces the network's change to a warp of the background is
-RFMGGenTrainer._warp_background (trainer.py)."""
+"""Profile-manifold-constrained feature extraction (along the hole): the depth encoding of the stations, the
+random-Fourier latent field along the hole (depth_latent_field), the learned station context (ProfileDepthContext)
+and the critic of profile windows (ProfilePatchDiscriminator).  The regional head that reduces the network's change
+to an order-preserving warp, a level and a contrast of the background is RFMGGenTrainer._warp_background
+(trainer.py)."""
 
 from __future__ import annotations
 
@@ -11,7 +12,7 @@ from typing import Dict, Optional, Sequence, Tuple
 import torch
 import torch.nn as nn
 
-from .layers import _rnn_call
+from ..models.layers import _rnn_call
 
 
 DEPTH_FEAT_DIM = 10

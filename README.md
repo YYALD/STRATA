@@ -7,13 +7,20 @@ identification under data scarcity**
 
 ## Overview
 
-STRATA generates labelled borehole transient electromagnetic (TEM) profiles from a few measured ones. Every generated
-profile starts from an anchor, the measured decay trend with synthetic anomalies drawn under physical priors. A network
-trained against critics of measured data then deforms only the background of the anchor, so each anomaly keeps the
-depth, shape and amplitude of its label. The constraints act in both dimensions of the record: in time, every decay is
-non-increasing by construction and every background decay is tested against the measured decays; along the hole, a
-latent field correlates the deformation from station to station, a monotone warp keeps the rock units in order and a
-critic judges profile windows.
+STRATA generates labelled borehole transient electromagnetic (TEM) profiles from a few measured ones. A generated
+profile $\mathbf{X}$ ($N$ stations × $T$ gates) lies on a joint decay–profile manifold,
+
+$$\mathcal{M}_2 = \left\lbrace \mathbf{X} = \mathbf{B} + \mathbf{U} : X_{i,j+1} \le X_{i,j},\ \mathbf{B} \in
+\mathcal{B}(\mathbf{L}),\ \mathbf{U} \in \mathcal{U} \right\rbrace,$$
+
+where $\mathcal{B}(\mathbf{L})$ are along-hole backgrounds derived from the measured profile $\mathbf{L}$ and
+$\mathcal{U}$ anomaly fields of conductors near the hole. Every generated profile starts from an anchor, the measured
+decay trend with synthetic anomalies drawn under physical priors; a network trained against critics of measured data
+then deforms only the background of the anchor, so each anomaly keeps the depth, shape and amplitude of its label. The
+constraints act in time (decay manifold: every decay non-increasing, every background decay tested against the
+measured decays), along the hole (profile manifold: a latent field correlates the deformation from station to station,
+a monotone warp keeps the rock units in order, a critic judges profile windows) and across the two (an anomaly takes
+its along-hole shape from the geometry of its conductor and its time window from the conductor's time constant).
 
 This repository holds the generator (`main.py` and the `strata` package) and one standalone program for each
 comparison generator (`methods/`). The field data of the manuscript are not included; the programs run on your own
@@ -21,19 +28,19 @@ profiles or on the synthetic example in `examples/`.
 
 ## Key Features
 
-- **Anchors on the measured trend**: the measured profile is split into a decay trend and departures; anchor
-  backgrounds change the level, decay rate and along-hole contrast of the trend and stay non-increasing in time
-  through a running minimum.
-- **Anomalies from physical priors**: 0–5 per profile, as conductors cut by the hole (a Gaussian footprint that widens
-  with time), conductors beside it (a tilted dipole field), near-hole zones or measured-like shapes from a shape bank
-  (departures of the input, simulated conductors and shapes of a β-VAE), each with a time envelope set by the
-  conductor's time constant. The drawn anomalies are the labels.
-- **Decay-manifold-constrained feature extraction**: each decay of the anchor is encoded with its condition, a
-  monotone decoder makes every decoded decay non-increasing, and a credibility gate moves decoded decays whose
-  conditions leave the manifold of the anchor conditions back toward it.
-- **Spatial-feature-constrained module**: a latent field and a depth context along the hole correlate the deformation
-  from station to station, and a regional head reduces it to a monotone warp, a level and a contrast of the
-  background, so each anomaly keeps the depth, shape and amplitude of its label.
+- **Joint decay–profile (space–time) manifold constraint**: the measured profile is split into a decay trend,
+  non-increasing in time and along the hole, and its departures; anchor backgrounds change the level, decay rate and
+  along-hole contrast of the trend and stay non-increasing in time through a running minimum. 0–5 anomalies per
+  profile are added as conductors cut by the hole (a Gaussian footprint that widens with time), conductors beside it
+  (a tilted dipole field), near-hole zones or measured-like shapes from a shape bank (departures of the input,
+  simulated conductors and shapes of a β-VAE), each with a time envelope set by the conductor's time constant. The
+  drawn anomalies are the labels.
+- **Decay-manifold-constrained feature extraction (in time)**: each decay of the anchor is encoded with its
+  condition, a monotone decoder makes every decoded decay non-increasing, and a credibility gate moves decoded decays
+  whose conditions leave the manifold of the anchor conditions back toward it.
+- **Profile-manifold-constrained feature extraction (along the hole)**: a latent field and a depth context along the
+  hole correlate the deformation from station to station, and a regional head reduces it to an order-preserving warp,
+  a level and a contrast of the background, so each anomaly keeps the depth, shape and amplitude of its label.
 - **Three critics**: latent sequences, single decays and profile windows; staged training and an exponential moving
   average of the generator.
 - **Admissibility and quality control**: a field-admissible manifold of the measured decays, background purity, warp
@@ -51,13 +58,13 @@ STRATA/
 │   │   ├── readers.py             # readers of measured profiles and survey line files
 │   │   ├── time_grid.py           # anchored time grid, PCHIP resampling
 │   │   ├── extension.py           # stations and times without a measurement
-│   │   ├── decomposition.py       # geological background plus anomalies
-│   │   ├── anomaly_laws.py        # laws of the synthetic anomalies
 │   │   ├── contract.py            # measured and simulated data objects
 │   │   └── normalization.py       # adaptive normalisation
+│   ├── manifold/                  # the manifold constraints (core of STRATA)
+│   │   ├── joint.py               # joint decay–profile (space–time) manifold: B and U
+│   │   ├── decay.py               # decay-manifold-constrained feature extraction (in time)
+│   │   └── profile.py             # profile-manifold-constrained feature extraction (along the hole)
 │   ├── models/
-│   │   ├── decay_manifold.py      # decay-manifold-constrained feature extraction
-│   │   ├── spatial.py             # spatial-feature-constrained module
 │   │   ├── generator.py           # latent generator and supervisor
 │   │   ├── critics.py             # critics of latent sequences and single decays
 │   │   ├── layers.py              # building blocks
@@ -99,11 +106,12 @@ STRATA/
 
 - **`main.py`**: the entry point. It runs from menus or from command-line flags and reports itself as RFMG-Gen
   22.2.0.
-- **`strata/data/`**: the data contract (the measured gates and depths are the time and depth standard), the
-  decomposition into decay trend and departures, and the laws of the synthetic anomalies.
-- **`strata/models/`**: the networks. `decay_manifold.py` and `spatial.py` hold the two constrained modules of the
-  architecture (below), `generator.py` the generator and its supervisor, `critics.py` the critics of latent sequences
-  and single decays.
+- **`strata/data/`**: the data contract; the measured gates and depths are the time and depth standard.
+- **`strata/manifold/`**: the three manifold constraints of the architecture (below): `joint.py` the joint
+  decay–profile manifold (the decomposition into decay trend and departures, and the laws of the anomaly fields),
+  `decay.py` the networks constrained in time, `profile.py` those constrained along the hole.
+- **`strata/models/`**: the other networks: `generator.py` the generator and its supervisor, `critics.py` the critics
+  of latent sequences and single decays.
 - **`strata/morphology.py`**: the shape bank and its β-VAE.
 - **`strata/trainer.py`**: anchors, the regional head, staged training and generation.
 - **`strata/physics.py`**, **`strata/quality.py`**, **`strata/export.py`**: the field-admissible manifold, quality
@@ -235,12 +243,15 @@ every profile), `generator.pt` and `run.json`.
 
 ```mermaid
 flowchart TB
+    subgraph S0 [" "]
+        direction LR
+        B["Backgrounds B(L)<br/>measured decay trend"] --> A["Anchor X = B + U<br/>0–5 labelled anomalies"]
+        U["Anomaly fields U<br/>shape from geometry,<br/>window from time constant"] --> A
+    end
     subgraph S1 [" "]
         direction LR
-        A["Anchor<br/>measured trend +<br/>0–5 labelled anomalies"] --> E["Decay encoder"]
-        A --> C["Condition extractor"]
-        E --> G["Generator"]
-        C --> G
+        E["Decay encoder"] --> G["Generator"]
+        C["Condition extractor"] --> G
         Z["Latent field +<br/>depth context"] --> G
         G --> R["Monotone decoder"]
     end
@@ -250,29 +261,37 @@ flowchart TB
         H --> Q["Field-admissible manifold<br/>+ quality control"]
         Q --> O["Labelled<br/>profiles"]
     end
+    S0 --> S1
     S1 --> S2
+    style S0 fill:none,stroke:#8c959f
     style S1 fill:none,stroke:#8c959f
     style S2 fill:none,stroke:#8c959f
+    classDef joint fill:#f6e3cf,stroke:#9a5b1e,color:#3a2108
     classDef decay fill:#dce8f5,stroke:#2f5d8a,color:#10243a
     classDef space fill:#e2f0dc,stroke:#3d7a34,color:#14300f
+    class B,U,A joint
     class E,C,R,K decay
     class Z,H space
 ```
 
-Blue: decay-manifold-constrained feature extraction; green: spatial-feature-constrained module. Critics of latent
-sequences, single decays and profile windows train the network.
+Orange: joint decay–profile (space–time) manifold; blue: decay-manifold-constrained feature extraction (in time);
+green: profile-manifold-constrained feature extraction (along the hole). Critics of latent sequences, single decays
+and profile windows train the network.
 
 The STRATA architecture consists of (files in `strata/`):
 
-1. **Anchor construction** (`data/decomposition.py`: `background_decomposition`; `trainer.py`:
+1. **Joint decay–profile (space–time) manifold** (`manifold/joint.py`: `background_decomposition`,
+   `measured_trend_undulations`, `borehole_physical_anomalies`, `dipole_axial_kernel`; `trainer.py`:
    `RFMGGenTrainer.compose_anchor`)
-   - **Decomposition**: the log amplitude of the measured profile is split into a decay trend, non-increasing in time
-     and along the hole, and the departures from it.
-   - **Background**: the trend with its level, decay rate and contrast changed, under a running minimum over time.
-   - **Anomalies**: relative response changes with shapes from the conductor geometry (or the shape bank) and time
-     envelopes from the time constants; they are the labels.
+   - **Backgrounds $\mathcal{B}(\mathbf{L})$**: the log amplitude of the measured profile is split into a decay trend,
+     non-increasing in time and along the hole, and the departures from it; a background is the trend with its level,
+     decay rate and contrast changed, under a running minimum over time.
+   - **Anomaly fields $\mathcal{U}$**: relative response changes whose along-hole shape follows the geometry of the
+     conductor (or the shape bank) and whose time window follows its time constant; they are the labels.
+   - **Anchor**: $\mathbf{X} = \mathbf{B} + \mathbf{U}$ with every decay non-increasing; the network below changes
+     only its background.
 
-2. **Decay-manifold-constrained feature extraction** (`models/decay_manifold.py`: `Embedder`,
+2. **Decay-manifold-constrained feature extraction, in time** (`manifold/decay.py`: `Embedder`,
    `TEMConditionExtractor`, `Recovery`, `_FinCMG`)
    - **Decay encoder**: two Transformer layers and a long short-term memory (LSTM) network map each decay of the
      anchor to a latent sequence; a direct value path keeps the amplitude of every gate.
@@ -284,8 +303,9 @@ The STRATA architecture consists of (files in `strata/`):
      anchor conditions (a memory bank) is moved toward its projection on it, and the decoded effect of the move
      corrects the decay; within the radius the decay stays nearly unchanged.
 
-3. **Spatial-feature-constrained module** (`models/spatial.py`: `depth_latent_field`, `ProfileDepthContext`,
-   `ProfilePatchDiscriminator`; `trainer.py`: `RFMGGenTrainer._warp_background`)
+3. **Profile-manifold-constrained feature extraction, along the hole** (`manifold/profile.py`:
+   `depth_latent_field`, `ProfileDepthContext`, `ProfilePatchDiscriminator`; `trainer.py`:
+   `RFMGGenTrainer._warp_background`)
    - **Latent field and depth context**: random Fourier features of depth and a bidirectional gated recurrent unit
      (GRU) over the stations correlate the deformation from station to station.
    - **Regional head**: the network's change of the background is reduced to a warp along the hole (three sine
@@ -298,7 +318,7 @@ The STRATA architecture consists of (files in `strata/`):
    latent; the supervisor learns the latent dynamics.
 
 5. **Critics and training** (`models/critics.py`: `ConditionalDiscriminator`, `SequencePatchDiscriminator`;
-   `models/spatial.py`: `ProfilePatchDiscriminator`; `trainer.py`: `RFMGGenTrainer`): critics of latent sequences,
+   `manifold/profile.py`: `ProfilePatchDiscriminator`; `trainer.py`: `RFMGGenTrainer`): critics of latent sequences,
    single decays and profile windows (minibatch standard-deviation features, non-saturating loss with an R1 penalty);
    stages from an autoencoder of single decays through the supervisor and a pretraining of the generator to
    adversarial training; generation with an exponential moving average of the generator.

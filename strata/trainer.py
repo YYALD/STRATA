@@ -23,14 +23,7 @@ from .common import (AMP_CALIBRATION_MIN_SCALE, AverageMeter, GradScaler, _parse
                      autocast, count_parameters, ensure_dir, generator_epoch_verdict, set_module_trainable,
                      stable_json_dumps)
 from .config import AppConfig
-from .data.anomaly_laws import (MEASURED_LIKE_SIZE_RANGE, SEPARATION_CANDIDATES, SEPARATION_CORE_SIGMAS,
-                                UNDULATION_LOCAL_POINTS, UNDULATION_REDRAWS, UNION_REFERENCE_PROFILES,
-                                UNION_REFERENCE_PROFILES_MEASURED, anomaly_amp_range, anomaly_count_law,
-                                anomaly_tau_range_log10, borehole_physical_anomalies, dipole_axial_kernel,
-                                lateral_correlation_law, measured_anomaly_mode, measured_anomaly_scale_ranges,
-                                template_width_sigma)
 from .data.contract import MeasuredData, SimPrior, local_structure_residual
-from .data.decomposition import local_poly_smoother_np, measured_anomaly_templates
 from .data.extension import anchor_profile_on, calibrate_unmeasured
 from .data.normalization import L_from_norm, NormalizationState, norm_from_L, torch_L_from_norm
 from .data.readers import build_survey_spec
@@ -39,12 +32,17 @@ from .losses import (ANOMALY_SHAPE_TOL, anomaly_shape_residual, centred_smooth_l
                      local_structure_torch, masked_quadratic_residual_torch, masked_quadratic_trend_torch,
                      masked_trend_fit_torch, ns_d_loss, ns_g_loss, r1_penalty, segment_weights, soft_chamfer,
                      structure_projection)
+from .manifold.decay import ConditionSupervisionHead, Embedder, Recovery, TEMConditionExtractor, _FinCMG, _FinFiLMMixer
+from .manifold.joint import (MEASURED_LIKE_SIZE_RANGE, SEPARATION_CANDIDATES, SEPARATION_CORE_SIGMAS,
+                             UNDULATION_LOCAL_POINTS, UNDULATION_REDRAWS, UNION_REFERENCE_PROFILES,
+                             UNION_REFERENCE_PROFILES_MEASURED, anomaly_amp_range, anomaly_count_law,
+                             anomaly_tau_range_log10, borehole_physical_anomalies, dipole_axial_kernel,
+                             lateral_correlation_law, local_poly_smoother_np, measured_anomaly_mode,
+                             measured_anomaly_scale_ranges, measured_anomaly_templates, template_width_sigma)
+from .manifold.profile import (ProfileDepthContext, ProfilePatchDiscriminator, depth_features, fourier_field,
+                               fourier_params_t)
 from .models.critics import ConditionalDiscriminator, SequencePatchDiscriminator
-from .models.decay_manifold import (ConditionSupervisionHead, Embedder, Recovery, TEMConditionExtractor, _FinCMG,
-                                    _FinFiLMMixer)
 from .models.generator import BridgeResidualGenerator, Supervisor
-from .models.spatial import (ProfileDepthContext, ProfilePatchDiscriminator, depth_features, fourier_field,
-                             fourier_params_t)
 from .morphology import (MORPH_EXAMPLE_SHARE, MORPH_FILTER, MORPH_PHYS_KERNELS, MORPH_PHYS_SHARES, MORPH_SIM_TAUS,
                          MORPH_U, MORPH_U_HALF, MORPH_U_POINTS, MORPH_VAE_BETA, MORPH_VAE_LATENT, MORPH_VAE_NT,
                          MORPH_VAE_NU, MORPH_VAE_PIX_SD, MORPH_VAE_U_HALF, MorphologyVAE, _interp_matrix,

@@ -16,19 +16,18 @@ import numpy as np
 from . import RFMG_PROGRAM_NAME, RFMG_VERSION
 from .common import array_digest, stable_json_dumps
 from .config import AppConfig
-from .data.anomaly_laws import (anomaly_amp_range, borehole_physical_anomalies, measured_anomaly_mode,
-                                measured_anomaly_scale_ranges, template_width_sigma)
 from .data.contract import MeasuredData, SimPrior, align_simulation, preprocess_measured, synthetic_tem_profile
-from .data.decomposition import (_DECAY, UNDULATION_SPLIT_SADDLE, _tmono_np, background_decomposition, background_scale,
-                                 decay_constraint_evidence, highpass_profile_np, local_poly_smoother_np,
-                                 measured_anomaly_inventory, measured_anomaly_templates, measured_trend_undulations,
-                                 purify_background, undulation_inventory)
 from .data.extension import anchor_profile_on, calibrate_unmeasured, extension_stations
 from .data.normalization import NormalizationState, fit_normalizer_log
 from .data.readers import (SURVEY_MODES, ProfileMatrix, SurveySpec, _strict_float, build_survey_spec,
                            detect_survey_mode, is_survey_line_file, read_measured_file, read_profile_matrix,
                            read_survey_lines)
 from .data.time_grid import depth_interp_profile
+from .manifold.joint import (_DECAY, UNDULATION_SPLIT_SADDLE, _tmono_np, anomaly_amp_range, background_decomposition,
+                             background_scale, borehole_physical_anomalies, decay_constraint_evidence,
+                             highpass_profile_np, local_poly_smoother_np, measured_anomaly_inventory,
+                             measured_anomaly_mode, measured_anomaly_scale_ranges, measured_anomaly_templates,
+                             measured_trend_undulations, purify_background, template_width_sigma, undulation_inventory)
 from .morphology import MORPH_U
 from .quality import PURITY_ANCHOR_SHARE
 

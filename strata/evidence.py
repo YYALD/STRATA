@@ -16,9 +16,9 @@ import pandas as pd
 from .common import array_digest, save_json
 from .config import AppConfig
 from .data.contract import MeasuredData
-from .data.decomposition import measured_station_noise
 from .data.readers import _strict_float
 from .data.time_grid import robust_depth_trend
+from .manifold.joint import measured_station_noise
 from .morphology import MORPH_U
 from .pipeline import measured_background
 

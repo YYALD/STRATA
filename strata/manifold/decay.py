@@ -1,6 +1,7 @@
-"""Decay-manifold-constrained feature extraction: the decay encoder (Embedder), the condition extractor
-(TEMConditionExtractor) and its supervision heads, the decoder with a monotone head (Recovery), and the credibility
-gate on the manifold of the anchor conditions (_FinCMG with its memory bank)."""
+"""Decay-manifold-constrained feature extraction (in time): the decay encoder (Embedder), the condition extractor
+(TEMConditionExtractor) and its supervision heads, the decoder with a monotone head (Recovery), so every decoded
+decay is non-increasing, and the credibility gate on the manifold of the anchor conditions (_FinCMG with its memory
+bank)."""
 
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..common import autocast
-from .layers import InceptionTimeLite, PositionalEncoding, TransformerBlock, _rfft_power, _rnn_call
+from ..models.layers import InceptionTimeLite, PositionalEncoding, TransformerBlock, _rfft_power, _rnn_call
 
 
 class Embedder(nn.Module):

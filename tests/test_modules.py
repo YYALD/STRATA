@@ -1,7 +1,7 @@
 """Properties of the architecture modules that hold by construction."""
 import torch
 
-from strata.models.decay_manifold import Recovery
+from strata.manifold.decay import Recovery
 
 
 def test_monotone_decoder():

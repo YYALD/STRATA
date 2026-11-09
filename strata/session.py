@@ -23,9 +23,7 @@ from .checkpoints import (_format_best_metric, _format_stage_progress, _scan_all
 from .cli import build_app_config, build_argument_parser, print_config_summary, resolve_io_paths
 from .common import ensure_dir, project_root, sanitize_path, save_json, set_seed, start_run_log
 from .config import LOCAL_REAL_NAMES, SERVER_REAL_FILE, AppConfig
-from .data.anomaly_laws import anomaly_count_law, measured_anomaly_mode
 from .data.contract import build_dense_depth_axis
-from .data.decomposition import _DECAY, _tmono_np
 from .data.time_grid import depth_interp_profile
 from .evidence import decomposition_evidence, diversity_report, identifiability_bench
 from .export import (GeneratedProfileStore, build_profile_index, disk_preflight, export_history, export_qc_split,
@@ -33,6 +31,7 @@ from .export import (GeneratedProfileStore, build_profile_index, disk_preflight,
 from .figures import (_axis_names, background_purity_report, extension_diagnostics, print_structure_summary,
                       save_anomaly_figures, save_background_figure, save_extension_figure, save_figures,
                       save_structure_figure)
+from .manifold.joint import _DECAY, _tmono_np, anomaly_count_law, measured_anomaly_mode
 from .pipeline import load_data_contract
 from .quality import (acceptance_summary, curve_quality_metrics, profile_quality_metrics, qc_gate_status,
                       structure_fidelity_metrics)

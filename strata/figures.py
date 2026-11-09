@@ -12,10 +12,9 @@ import numpy as np
 import pandas as pd
 
 from .common import ensure_dir
-from .data.anomaly_laws import SEPARATION_CORE_SIGMAS
 from .data.contract import MeasuredData, SimPrior, local_structure_residual
-from .data.decomposition import highpass_profile_np, local_poly_smoother_np
 from .data.time_grid import depth_interp_profile
+from .manifold.joint import SEPARATION_CORE_SIGMAS, highpass_profile_np, local_poly_smoother_np
 from .physics import PhysicsDescriptor
 from .quality import PURITY_ANCHOR_SHARE
 
